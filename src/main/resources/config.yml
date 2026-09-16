@@ -1,0 +1,36 @@
+# YouTubeMusic 2.8.7 — Paper 26.2+
+# Paper 26.2+ yêu cầu Java 25.
+ui:
+  enabled: true
+  bedrock-forms: true
+  java-inventory: true
+queue:
+  max-size: 25
+  loop: false
+  shuffle: false
+  radio: false
+request:
+  cooldown-seconds: 5
+security:
+  max-url-length: 2048
+  max-track-duration-seconds: 3600
+  allow-youtube-only: true
+player:
+  default-volume: 80
+  max-volume: 100
+storage:
+  file: music.db
+audio:
+  backend: yt-dlp-resource-pack
+  yt-dlp-command: "yt-dlp"
+  ffmpeg-command: "ffmpeg"
+  max-duration-seconds: 3600
+  resource-pack-url-template: "http://YOUR_PUBLIC_IP:8126/packs/%s"
+  resource-pack-required: false
+  resource-pack-timeout-seconds: 90
+  resource-pack-https-recommended: true
+  play-delay-ticks: 60
+  resource-pack-server:
+    enabled: true
+  resource-pack-server-port: 8126
+  cache-directory: "audio-cache"
