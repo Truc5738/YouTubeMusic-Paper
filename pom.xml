@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>vn.youtubemusic</groupId>
+  <artifactId>youtubemusic-paper</artifactId>
+  <version>2.8.7</version>
+  <packaging>jar</packaging>
+
+  <name>YouTubeMusic</name>
+  <description>YouTube Music player for Paper 26.2 with Java and Geyser/Floodgate Bedrock UI support</description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.compiler.release>25</maven.compiler.release>
+    <paper.version>26.2.build.121-stable</paper.version>
+    <floodgate.version>2.2.5-SNAPSHOT</floodgate.version>
+    <sqlite.version>3.50.3.0</sqlite.version>
+    <cumulus.version>1.1.2</cumulus.version>
+  </properties>
+
+  <repositories>
+    <repository><id>papermc</id><name>PaperMC</name><url>https://repo.papermc.io/repository/maven-public/</url></repository>
+    <repository><id>opencollab</id><name>Open Collaboration</name><url>https://repo.opencollab.dev/main/</url></repository>
+    <repository><id>central</id><name>Maven Central</name><url>https://repo.maven.apache.org/maven2</url></repository>
+  </repositories>
+
+  <dependencies>
+    <dependency><groupId>io.papermc.paper</groupId><artifactId>paper-api</artifactId><version>${paper.version}</version><scope>provided</scope></dependency>
+    <dependency><groupId>org.geysermc.floodgate</groupId><artifactId>api</artifactId><version>${floodgate.version}</version><scope>provided</scope></dependency>
+    <dependency><groupId>org.geysermc.cumulus</groupId><artifactId>cumulus</artifactId><version>${cumulus.version}</version><scope>provided</scope></dependency>
+    <dependency><groupId>org.xerial</groupId><artifactId>sqlite-jdbc</artifactId><version>${sqlite.version}</version></dependency>
+  </dependencies>
+
+  <build>
+    <finalName>YouTubeMusic-Paper-26.2-${project.version}</finalName>
+    <resources><resource><directory>src/main/resources</directory><filtering>false</filtering></resource></resources>
+    <plugins>
+      <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-enforcer-plugin</artifactId><version>3.6.2</version><executions><execution><id>enforce-java-25</id><phase>validate</phase><goals><goal>enforce</goal></goals><configuration><rules><requireJavaVersion><version>[25,26)</version></requireJavaVersion></rules></configuration></execution></executions></plugin>
+      <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><version>3.14.0</version><configuration><release>25</release><encoding>UTF-8</encoding><parameters>true</parameters></configuration></plugin>
+      <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-jar-plugin</artifactId><version>3.4.2</version></plugin>
+      <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-shade-plugin</artifactId><version>3.6.0</version><executions><execution><phase>package</phase><goals><goal>shade</goal></goals><configuration><createDependencyReducedPom>false</createDependencyReducedPom><shadedArtifactAttached>false</shadedArtifactAttached><minimizeJar>false</minimizeJar><artifactSet><includes><include>org.xerial:sqlite-jdbc</include></includes></artifactSet></configuration></execution></executions></plugin>
+    </plugins>
+  </build>
+</project>
