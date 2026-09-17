@@ -4,18 +4,19 @@ description: Hệ thống âm nhạc YouTube cho Paper 26.2+, có UI Java và Be
 version: 2.8.7
 main: vn.youtubemusic.YouTubeMusicPlugin
 api-version: '26.2'
-website: https://papermc.io/
+website: https://github.com/Truc5738/YouTubeMusic-Paper
 depend: [floodgate]
 softdepend: [Geyser-Spigot, ViaVersion, ViaBackwards]
 commands:
   music:
     description: Mở và quản lý YouTube Music
-    usage: /music [play|queue|skip|stop|volume|loop|shuffle|radio|status|help]
+    usage: /music [play|queue|skip|stop|volume|loop|shuffle|radio|favorite|favorites|history|status|help]
     aliases: [ytmusic, nhac]
     permission: youtubemusic.use
     permission-message: "§cBạn không có quyền dùng YouTube Music."
 permissions:
   youtubemusic.use: {default: true}
   youtubemusic.play: {default: true}
+  youtubemusic.control: {default: true}
   youtubemusic.bypass: {default: op}
   youtubemusic.admin: {default: op}
