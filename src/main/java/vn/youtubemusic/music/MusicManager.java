@@ -19,6 +19,23 @@ public final class MusicManager {
     public MusicManager(JavaPlugin plugin, Storage storage) { this.plugin=plugin; this.storage=storage; loop=plugin.getConfig().getBoolean("queue.loop",false); shuffle=plugin.getConfig().getBoolean("queue.shuffle",false); radio=plugin.getConfig().getBoolean("queue.radio",false); audioBackend=new ApiAudioBackend(plugin); }
     public void request(Player who,String url) { if(!validYoutube(url)){who.sendMessage("§cURL YouTube không hợp lệ.");return;} long now=System.currentTimeMillis(); long cooldown=plugin.getConfig().getLong("request.cooldown-seconds",5)*1000L; long last=cooldowns.getOrDefault(who.getUniqueId(),0L); if(!who.hasPermission("youtubemusic.bypass")&&now-last<cooldown){long left=Math.max(1,(cooldown-(now-last))/1000L);who.sendMessage("§eVui lòng chờ "+left+" giây.");return;} synchronized(this){if(queue.size()>=plugin.getConfig().getInt("queue.max-size",25)){who.sendMessage("§cHàng đợi đã đầy.");return;}} cooldowns.put(who.getUniqueId(),now); who.sendMessage("§e⏳ Đang phân tích và tải âm thanh YouTube..."); audioBackend.resolveAndDownload(url).whenComplete((resolved,error)->Bukkit.getScheduler().runTask(plugin,()->{if(error!=null){Throwable cause=error instanceof CompletionException&&error.getCause()!=null?error.getCause():error;who.sendMessage("§c✖ Không thể xử lý YouTube: §f"+(cause.getMessage()==null?cause.getClass().getSimpleName():cause.getMessage()));return;} Track source=resolved.track(); Track track=new Track(source.title(),source.url(),source.durationSeconds(),source.id(),who.getUniqueId()); addResolved(who,new AudioBackend.ResolvedAudio(track,resolved.audioFile()));})); }
     private void addResolved(Player who,AudioBackend.ResolvedAudio resolved){Track track=resolved.track(); synchronized(this){queue.add(track);who.sendMessage("§a✔ Đã thêm §f"+track.title()+" §avào hàng đợi.");if(current==null)next(resolved);} CompletableFuture.runAsync(()->storage.history(who.getUniqueId(),track));}
+    public void search(Player who, String query, java.util.function.Consumer<java.util.List<Track>> callback) {
+        if (!(audioBackend instanceof ApiAudioBackend api)) { callback.accept(java.util.List.of()); return; }
+        api.search(query, 10).whenComplete((list, error) -> Bukkit.getScheduler().runTask(plugin, () -> {
+            if (error != null) {
+                Throwable cause = error instanceof CompletionException && error.getCause()!=null ? error.getCause() : error;
+                who.sendMessage("§c✖ Tìm kiếm thất bại: §f" + (cause.getMessage()==null ? cause.getClass().getSimpleName() : cause.getMessage()));
+                callback.accept(java.util.List.of());
+            } else callback.accept(list);
+        }));
+    }
+    public void playSaved(Player p, Track t) { if (t != null) request(p, t.url()); }
+    public void playSearchResult(Player p, Track t) { if (t != null) request(p, t.url()); }
+    public synchronized boolean toggleFavorite(Player p) {
+        Track t=current; if(t==null) return false;
+        if(storage.isFavorite(p.getUniqueId(),t.url())) { storage.unfavorite(p.getUniqueId(),t.url()); return false; }
+        storage.favorite(p.getUniqueId(),t); return true;
+    }
     private boolean validYoutube(String url){if(url==null||url.isBlank()||url.length()>plugin.getConfig().getInt("security.max-url-length",2048))return false;try{String h=URI.create(url.trim()).getHost();return h!=null&&(h.equalsIgnoreCase("youtube.com")||h.endsWith(".youtube.com")||h.equalsIgnoreCase("youtu.be"));}catch(Exception e){return false;}}
     public synchronized void next(){next(null);}
     private synchronized void next(AudioBackend.ResolvedAudio resolvedHint){if(loop&&current!=null){play(current,audioFiles.get(current.id()));return;} current=shuffle&&!queue.isEmpty()?removeRandom():queue.pollFirst(); paused=false; final Track selected=current; final long generation=++playbackGeneration; if(selected!=null){if(resolvedHint!=null&&resolvedHint.track().id().equals(selected.id())){play(selected,resolvedHint.audioFile());return;} audioBackend.resolveAndDownload(selected.url()).whenComplete((r,e)->Bukkit.getScheduler().runTask(plugin,()->{synchronized(MusicManager.this){if(generation!=playbackGeneration||current==null||!current.id().equals(selected.id()))return;if(e!=null){audioFailed(selected,e.getMessage());return;}play(selected,r.audioFile());}}));}else if(radio){Bukkit.getOnlinePlayers().forEach(p->p.sendMessage("§d📻 Radio đang chờ bài tiếp theo. Hãy thêm một bài vào hàng đợi."));}}
