@@ -234,7 +234,7 @@ public final class ApiAudioBackend implements AudioBackend {
     }
 
     private static String unescape(String s) {
-        return s.replace("\\"", """).replace("\\\\", "\").replace("\\/", "/");
+        return s.replace("\\\"", "\"").replace("\\\\", "\\").replace("\\/", "/");
     }
 
     private static String quote(String s) {
