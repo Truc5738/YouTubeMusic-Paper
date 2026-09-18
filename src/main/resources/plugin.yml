@@ -1,7 +1,7 @@
 name: YouTubeMusic
 author: Hyung + OpenAI
 description: Hệ thống âm nhạc YouTube cho Paper 26.2+, UI Java + Bedrock kiểu Spotify, thư viện cá nhân và tìm kiếm YouTube.
-version: 2.10.0
+version: 2.11.0
 main: vn.youtubemusic.YouTubeMusicPlugin
 api-version: '26.2'
 website: https://github.com/Truc5738/YouTubeMusic-Paper
@@ -10,7 +10,7 @@ softdepend: [Geyser-Spigot, ViaVersion, ViaBackwards]
 commands:
   music:
     description: Mở và quản lý YouTube Music
-    usage: /music [play|queue|skip|stop|volume|loop|shuffle|radio|favorite|favorites|history|status|help]
+    usage: /music [play|queue|skip|stop|volume|loop|shuffle|radio|favorite|favorites|history|status|lyrics|say|help]
     aliases: [ytmusic, nhac]
     permission: youtubemusic.use
     permission-message: "§cBạn không có quyền dùng YouTube Music."
