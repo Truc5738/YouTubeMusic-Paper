@@ -27,12 +27,14 @@ public final class BedrockMusicUi implements BedrockUiBridge {
           .button("⏭ Bỏ qua").button("⏹ Dừng").button("📋 Hàng đợi").button("♥ Yêu thích").button("🕘 Lịch sử")
           .button("🔁 Lặp: "+(music.loop()?"BẬT":"TẮT")).button("🔀 Trộn: "+(music.shuffle()?"BẬT":"TẮT"))
           .button("📻 Radio: "+(music.radio()?"BẬT":"TẮT")).button("🔊 Âm lượng: "+music.volume(p)+"%")
-          .button("♥ "+(t!=null&&storage.isFavorite(p.getUniqueId(),t.url())?"Bỏ lưu":"Lưu bài"));
+          .button("♥ "+(t!=null&&storage.isFavorite(p.getUniqueId(),t.url())?"Bỏ lưu":"Lưu bài"))
+          .button("🎤 Lời riêng: "+(music.lyrics().isEnabled(p)?"BẬT":"TẮT"));
         b.validResultHandler((SimpleFormResponse r)->{switch(r.clickedButtonId()){
             case 0->search(p); case 1->input(p); case 2->{if(music.paused())music.resume();else music.pause();open(p);}
             case 3->{music.skip();open(p);} case 4->{music.stop();open(p);} case 5->queue(p); case 6->library(p,false); case 7->library(p,true);
             case 8->{music.toggleLoop();open(p);} case 9->{music.toggleShuffle();open(p);} case 10->{music.toggleRadio();open(p);}
             case 11->volume(p); case 12->{if(music.current()!=null)p.sendMessage(music.toggleFavorite(p)?"§a♥ Đã lưu bài.":"§e♥ Đã bỏ lưu bài.");open(p);}
+            case 13->{music.lyrics().toggle(p);open(p);}
         }}); f.sendForm(b);
     }
     private void input(Player p){if(!p.hasPermission("youtubemusic.play"))return;FloodgatePlayer f=fp(p);if(f==null)return;
