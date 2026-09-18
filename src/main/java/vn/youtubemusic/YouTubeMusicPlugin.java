@@ -23,9 +23,9 @@ public final class YouTubeMusicPlugin extends JavaPlugin {
         validateAudioConfiguration();
         storage = new Storage(this);
         music = new MusicManager(this, storage);
-        MusicGui gui = new MusicGui(this, music);
+        MusicGui gui = new MusicGui(this, music, storage);
         boolean floodgatePresent = getServer().getPluginManager().getPlugin("floodgate") != null;
-        BedrockUiBridge bedrock = BedrockUiBridge.create(music, floodgatePresent);
+        BedrockUiBridge bedrock = BedrockUiBridge.create(music, storage, floodgatePresent);
         MusicCommand command = new MusicCommand(this, music, gui, bedrock, storage);
         if (getCommand("music") != null) {
             getCommand("music").setExecutor(command);
