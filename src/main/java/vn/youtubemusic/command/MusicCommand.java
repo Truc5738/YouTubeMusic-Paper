@@ -75,7 +75,7 @@ public final class MusicCommand implements CommandExecutor, TabCompleter {
                 s.sendMessage("§7Queue: " + music.queue().size() + " | Lặp: " + music.loop() + " | Trộn: " + music.shuffle() + " | Radio: " + music.radio());
             }
             case "reload" -> { if (!admin(s)) return true; plugin.reloadConfig(); music.reloadSettings(); s.sendMessage("§a✔ Đã tải lại cấu hình và đồng bộ hàng đợi."); }
-            case "debug" -> { if (!admin(s)) return true; s.sendMessage("§bYouTubeMusic §7| Paper 26.2 | Java 25 | UI: Java + Bedrock | Backend: yt-dlp + resource pack"); }
+            case "debug" -> { if (!admin(s)) return true; s.sendMessage("§bYouTubeMusic §7| Paper 26.2 | Java 25 | UI: Java + Bedrock | Backend: API + resource pack"); }
             case "doctor", "diagnostics" -> { if (!admin(s)) return true; doctor(s); }
             case "help" -> help(s);
             default -> help(s);
@@ -119,8 +119,12 @@ public final class MusicCommand implements CommandExecutor, TabCompleter {
 
     private void doctor(CommandSender s) {
         s.sendMessage("§b§lYouTubeMusic Doctor");
-        check(s, "yt-dlp", plugin.getConfig().getString("audio.yt-dlp-command", "yt-dlp"));
-        check(s, "ffmpeg", plugin.getConfig().getString("audio.ffmpeg-command", "ffmpeg"));
+        String api = plugin.getConfig().getString("audio.api.url", "");
+        s.sendMessage(api.isBlank() ? "§c✖ Audio API URL chưa cấu hình." : "§a✔ Audio API: §f" + api);
+        String apiKey = plugin.getConfig().getString("audio.api.key", "");
+        s.sendMessage(apiKey.isBlank() ? "§e⚠ Audio API key: §7không dùng" : "§a✔ Audio API key: §7đã cấu hình");
+        String ytKey = plugin.getConfig().getString("audio.youtube-data-api-key", "");
+        s.sendMessage(ytKey.isBlank() ? "§e⚠ YouTube Data API: §7không dùng (thời lượng fallback)" : "§a✔ YouTube Data API: §7đã cấu hình");
         String url = plugin.getConfig().getString("audio.resource-pack-url-template", "");
         s.sendMessage(url.contains("YOUR_PUBLIC_IP") || url.isBlank() ? "§c✖ Resource-pack URL chưa cấu hình." : "§a✔ Resource-pack URL đã cấu hình.");
         boolean embedded = plugin.getConfig().getBoolean("audio.resource-pack-server.enabled", true);
