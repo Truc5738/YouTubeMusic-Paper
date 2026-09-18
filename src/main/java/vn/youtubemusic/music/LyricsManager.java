@@ -20,13 +20,15 @@ public final class LyricsManager {
     private long startedAt;
     private long offsetMillis;
     private boolean paused;
+    private final long tickInterval;
     private int lastLine = -1;
 
     public LyricsManager(JavaPlugin plugin) {
         this.plugin = plugin;
+        this.tickInterval = Math.max(1L, plugin.getConfig().getLong("lyrics.tick-interval-ticks", 5L));
         Path dir = plugin.getDataFolder().toPath().resolve(plugin.getConfig().getString("lyrics.directory", "lyrics"));
         try { Files.createDirectories(dir); } catch (IOException e) { plugin.getLogger().warning("Không tạo được thư mục lời bài hát: " + e.getMessage()); }
-        Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 2L, 5L);
+        Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 2L, tickInterval);
     }
 
     public boolean toggle(Player p) {
