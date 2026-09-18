@@ -45,6 +45,7 @@ public final class MusicGui implements Listener {
         i.setItem(23,item(Material.NOTE_BLOCK,"§f🔊 Âm lượng: "+music.volume(p)+"%"));
         i.setItem(24,item(Material.GOLD_INGOT,"§6♥ "+(t!=null&&storage.isFavorite(p.getUniqueId(),t.url())?"Bỏ lưu":"Lưu bài hiện tại")));
         i.setItem(25,item(Material.BOOK,"§fℹ Trạng thái","§7UI Java + Bedrock","§7API audio + resource pack"));
+        i.setItem(32,item(Material.WRITABLE_BOOK,"§d🎤 Lời bài hát riêng","§7"+(music.lyrics().isEnabled(p)?"Đang BẬT":"Đang TẮT"),"§7Chỉ bạn thấy lyrics","§7Dùng /music lyrics để đổi"));
         i.setItem(31,item(Material.WRITABLE_BOOK,"§f⚙ Hướng dẫn","§7/musics để mở UI (lệnh /music vẫn dùng được)"));
         i.setItem(40,item(Material.BARRIER,"§cĐóng"));
         p.openInventory(i);
@@ -87,6 +88,7 @@ public final class MusicGui implements Listener {
                 case 23->p.sendMessage("§bDùng /music volume <0-100> để chỉnh âm lượng.");
                 case 24->{if(music.current()!=null)p.sendMessage(music.toggleFavorite(p)?"§a♥ Đã lưu bài.":"§e♥ Đã bỏ lưu bài.");open(p);}
                 case 31->p.sendMessage("§bTìm kiếm cần YouTube Data API key trong config.yml. §7URL vẫn hoạt động không cần key.");
+                case 32->{music.lyrics().toggle(p);open(p);}
                 case 40->p.closeInventory();
             }return;
         }
