@@ -16,7 +16,7 @@ public final class YouTubeMusicPlugin extends JavaPlugin {
         saveResource("messages_vi.yml", false);
         int javaFeature = Runtime.version().feature();
         if (javaFeature < 25) {
-            getLogger().severe("YouTubeMusic 2.8.7 yêu cầu Java 25 trở lên. Java hiện tại: " + Runtime.version());
+            getLogger().severe("YouTubeMusic 2.9.0 yêu cầu Java 25 trở lên. Java hiện tại: " + Runtime.version());
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -32,11 +32,13 @@ public final class YouTubeMusicPlugin extends JavaPlugin {
             getCommand("music").setTabCompleter(command);
         }
         getServer().getPluginManager().registerEvents(gui, this);
-        getLogger().info("YouTubeMusic 2.8.7 đã bật — Paper 26.2+ / Java 25+ / Java UI + Bedrock Forms.");
+        getLogger().info("YouTubeMusic 2.9.0 đã bật — Paper 26.2+ / Java 25+ / Java UI + Bedrock Forms.");
         if (floodgatePresent) getLogger().info("Floodgate đã sẵn sàng — Bedrock Forms được bật.");
     }
 
     private void validateAudioConfiguration() {
+        String apiUrl = getConfig().getString("audio.api.url", "");
+        if (apiUrl.isBlank()) getLogger().warning("audio.api.url chưa cấu hình; plugin sẽ không thể lấy audio.");
         String packUrl = getConfig().getString("audio.resource-pack-url-template", "");
         if (packUrl.isBlank() || packUrl.contains("YOUR_PUBLIC_IP")) {
             getLogger().warning("Resource-pack URL chưa cấu hình; YouTubeMusic sẽ không thể phát audio Java cho đến khi cấu hình audio.resource-pack-url-template.");
