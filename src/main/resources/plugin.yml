@@ -1,7 +1,7 @@
 name: YouTubeMusic
 author: Hyung + OpenAI
-description: Hệ thống âm nhạc YouTube cho Paper 26.2+, có UI Java và Bedrock qua Floodgate.
-version: 2.9.0
+description: Hệ thống âm nhạc YouTube cho Paper 26.2+, UI Java + Bedrock kiểu Spotify, thư viện cá nhân và tìm kiếm YouTube.
+version: 2.10.0
 main: vn.youtubemusic.YouTubeMusicPlugin
 api-version: '26.2'
 website: https://github.com/Truc5738/YouTubeMusic-Paper
