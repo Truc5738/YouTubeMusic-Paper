@@ -1,4 +1,4 @@
-# YouTubeMusic 2.8.7 — Paper 26.2+
+# YouTubeMusic 2.9.0 API Edition — Paper 26.2+
 # Paper 26.2+ yêu cầu Java 25.
 ui:
   enabled: true
@@ -21,10 +21,19 @@ player:
 storage:
   file: music.db
 audio:
-  backend: yt-dlp-resource-pack
-  yt-dlp-command: "yt-dlp"
-  ffmpeg-command: "ffmpeg"
+  backend: api-resource-pack
   max-duration-seconds: 3600
+  default-duration-seconds: 600
+  api:
+    # Cobalt-compatible API instance. Tự host API để ổn định và tránh phụ thuộc API công cộng.
+    url: "http://127.0.0.1:9000/"
+    key: ""
+    bitrate: "128"
+    timeout-seconds: 120
+  # Optional: YouTube Data API v3 key for title + thời lượng chính xác.
+  # Không dùng để lấy audio; audio vẫn do API resolver ở trên cung cấp.
+  youtube-data-api-key: ""
+  download-timeout-seconds: 300
   resource-pack-url-template: "http://YOUR_PUBLIC_IP:8126/packs/%s"
   resource-pack-required: false
   resource-pack-timeout-seconds: 90
