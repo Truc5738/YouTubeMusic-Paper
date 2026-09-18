@@ -3,6 +3,7 @@ package vn.youtubemusic.command;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.Bukkit;
 import vn.youtubemusic.geyser.BedrockUiBridge;
 import vn.youtubemusic.gui.MusicGui;
 import vn.youtubemusic.music.MusicManager;
@@ -67,6 +68,8 @@ public final class MusicCommand implements CommandExecutor, TabCompleter {
             case "shuffle" -> { if (!control(s)) return true; music.toggleShuffle(); s.sendMessage("§d🔀 Trộn: " + (music.shuffle() ? "BẬT" : "TẮT")); }
             case "radio" -> { if (!control(s)) return true; music.toggleRadio(); s.sendMessage("§5📻 Radio: " + (music.radio() ? "BẬT" : "TẮT")); }
             case "favorite", "fav" -> favorite(s, a);
+            case "lyrics", "lyric" -> lyrics(s, a);
+            case "say" -> sayLyrics(s, a);
             case "favorites", "favs" -> listSaved(s, false);
             case "history" -> listSaved(s, true);
             case "status", "now" -> {
@@ -92,6 +95,23 @@ public final class MusicCommand implements CommandExecutor, TabCompleter {
         if (s.hasPermission("youtubemusic.admin")) return true;
         s.sendMessage("§cBạn không có quyền.");
         return false;
+    }
+
+    private void lyrics(CommandSender s, String[] a) {
+        if (!(s instanceof Player p)) { s.sendMessage("§cLệnh này cần một người chơi."); return; }
+        if (a.length >= 2) {
+            boolean on = !a[1].equalsIgnoreCase("off") && !a[1].equalsIgnoreCase("tat") && !a[1].equalsIgnoreCase("tắt");
+            music.lyrics().setEnabled(p, on);
+        } else music.lyrics().toggle(p);
+    }
+
+    private void sayLyrics(CommandSender s, String[] a) {
+        if (!s.hasPermission("youtubemusic.control")) { s.sendMessage("§cBạn không có quyền bật lời cho người khác."); return; }
+        if (a.length < 2) { s.sendMessage("§eDùng: /music say <tên người chơi>"); return; }
+        Player target = Bukkit.getPlayerExact(a[1]);
+        if (target == null) { s.sendMessage("§cKhông tìm thấy người chơi đang online: §f" + a[1]); return; }
+        boolean on = music.lyrics().toggle(target);
+        s.sendMessage("§a🎤 Lời riêng của §f" + target.getName() + "§a: " + (on ? "BẬT" : "TẮT"));
     }
 
     private void favorite(CommandSender s, String[] a) {
@@ -155,10 +175,11 @@ public final class MusicCommand implements CommandExecutor, TabCompleter {
         s.sendMessage("§f/music §7UI | §f/music play <URL> §7phát | §f/music queue §7hàng đợi | §f/music skip §7bỏ qua | §f/music stop §7dừng");
         s.sendMessage("§f/music volume <0-100> §7âm lượng | §f/music loop §7lặp | §f/music shuffle §7trộn | §f/music radio §7radio");
         s.sendMessage("§f/music favorite §7lưu bài hiện tại | §f/music favorite remove §7bỏ lưu | §f/music favorites §7yêu thích | §f/music history §7lịch sử");
+        s.sendMessage("§f/music lyrics §7bật/tắt lời riêng | §f/music say <người chơi> §7bật lời cho người chơi");
     }
 
     public List<String> onTabComplete(CommandSender s, Command c, String alias, String[] args) {
-        if (args.length == 1) return List.of("play", "ui", "stop", "pause", "resume", "skip", "queue", "clear", "remove", "volume", "loop", "shuffle", "radio", "favorite", "favorites", "history", "status", "reload", "debug", "doctor", "diagnostics", "help").stream().filter(x -> x.startsWith(args[0].toLowerCase(Locale.ROOT))).toList();
+        if (args.length == 1) return List.of("play", "ui", "stop", "pause", "resume", "skip", "queue", "clear", "remove", "volume", "loop", "shuffle", "radio", "favorite", "favorites", "history", "lyrics", "say", "status", "reload", "debug", "doctor", "diagnostics", "help").stream().filter(x -> x.startsWith(args[0].toLowerCase(Locale.ROOT))).toList();
         if (args.length == 2 && (args[0].equalsIgnoreCase("favorite") || args[0].equalsIgnoreCase("fav"))) return List.of("remove").stream().filter(x -> x.startsWith(args[1].toLowerCase(Locale.ROOT))).toList();
         return List.of();
     }
