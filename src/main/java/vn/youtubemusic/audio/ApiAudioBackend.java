@@ -93,6 +93,32 @@ public final class ApiAudioBackend implements AudioBackend {
         }, executor);
     }
 
+    /** Spotify-style keyword search using YouTube Data API v3. */
+    public CompletableFuture<java.util.List<Track>> search(String query, int limit) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                if (youtubeKey.isBlank()) throw new IOException("Chưa cấu hình YouTube Data API key.");
+                String q = query == null ? "" : query.trim();
+                if (q.isBlank()) return java.util.List.of();
+                int max = Math.max(1, Math.min(10, limit));
+                String endpoint = "https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=" + max
+                        + "&q=" + java.net.URLEncoder.encode(q, java.nio.charset.StandardCharsets.UTF_8)
+                        + "&key=" + java.net.URLEncoder.encode(youtubeKey, java.nio.charset.StandardCharsets.UTF_8);
+                HttpRequest req = HttpRequest.newBuilder(URI.create(endpoint)).timeout(Duration.ofSeconds(20))
+                        .header("Accept","application/json").GET().build();
+                HttpResponse<String> res = http.send(req, HttpResponse.BodyHandlers.ofString());
+                if (res.statusCode() < 200 || res.statusCode() >= 300) throw new IOException("YouTube Search API HTTP " + res.statusCode());
+                java.util.List<Track> out = new java.util.ArrayList<>();
+                Matcher m = Pattern.compile("\\\"videoId\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"[\\s\\S]*?\\\"title\\\"\\s*:\\s*\\\"((?:\\\\.|[^\\\"])*)\\\"").matcher(res.body());
+                while (m.find() && out.size() < max) {
+                    String id=m.group(1); String title=unescape(m.group(2));
+                    if (id != null && !id.isBlank()) out.add(new Track(title, "https://www.youtube.com/watch?v="+id, defaultDuration, id));
+                }
+                return out;
+            } catch(Exception e) { throw new CompletionException(e); }
+        }, executor);
+    }
+
     private String callResolverApi(String sourceUrl) throws Exception {
         String body = "{"
                 + "\"url\":" + quote(sourceUrl) + ","
