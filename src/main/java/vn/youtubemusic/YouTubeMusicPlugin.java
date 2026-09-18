@@ -16,7 +16,7 @@ public final class YouTubeMusicPlugin extends JavaPlugin {
         saveResource("messages_vi.yml", false);
         int javaFeature = Runtime.version().feature();
         if (javaFeature < 25) {
-            getLogger().severe("YouTubeMusic 2.10.0 yêu cầu Java 25 trở lên. Java hiện tại: " + Runtime.version());
+            getLogger().severe("YouTubeMusic 2.11.0 yêu cầu Java 25 trở lên. Java hiện tại: " + Runtime.version());
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -32,7 +32,7 @@ public final class YouTubeMusicPlugin extends JavaPlugin {
             getCommand("music").setTabCompleter(command);
         }
         getServer().getPluginManager().registerEvents(gui, this);
-        getLogger().info("YouTubeMusic 2.9.0 đã bật — Paper 26.2+ / Java 25+ / Java UI + Bedrock Forms.");
+        getLogger().info("YouTubeMusic 2.11.0 đã bật — Paper 26.2+ / Java 25+ / Java UI + Bedrock Forms.");
         if (floodgatePresent) getLogger().info("Floodgate đã sẵn sàng — Bedrock Forms được bật.");
     }
 
