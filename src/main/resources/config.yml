@@ -1,4 +1,10 @@
-# YouTubeMusic 2.9.0 API Edition — Paper 26.2+
+# YouTubeMusic 2.11.0 — API Edition + Spotify-style UI + private synced lyrics
+lyrics:
+  enabled: true
+  directory: "lyrics"
+  format: "lrc"
+  private-chat: true
+
 # Paper 26.2+ yêu cầu Java 25.
 ui:
   enabled: true
