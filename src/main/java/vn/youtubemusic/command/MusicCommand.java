@@ -150,7 +150,7 @@ public final class MusicCommand implements CommandExecutor, TabCompleter {
             if (results.isEmpty()) { s.sendMessage("§eKhông có kết quả. Hãy kiểm tra YouTube Data API key trong config.yml."); return; }
             s.sendMessage("§b§lKết quả tìm kiếm:");
             for (int i=0; i<results.size(); i++) s.sendMessage("§7"+(i+1)+". §f"+results.get(i).title());
-            s.sendMessage("§7Dùng §f/music playfavorite <số> §7cho thư viện; kết quả tìm kiếm có thể phát trực tiếp từ UI.");
+            s.sendMessage("§7Kết quả tìm kiếm có thể phát trực tiếp từ UI; thư viện dùng §f/music playfavorite <số>§7.");
         });
     }
 
@@ -216,7 +216,7 @@ public final class MusicCommand implements CommandExecutor, TabCompleter {
         s.sendMessage("§b§lYouTube Music §7— lệnh chính");
         s.sendMessage("§f/music §7UI | §f/music play <URL> §7phát | §f/music queue §7hàng đợi | §f/music skip §7bỏ qua | §f/music stop §7dừng");
         s.sendMessage("§f/music volume <0-100> §7âm lượng | §f/music loop §7lặp | §f/music shuffle §7trộn | §f/music radio §7radio");
-        s.sendMessage("§f/music favorite §7lưu | §f/music favorite remove §7bỏ lưu | §f/music favorite remove-index <số> §7xóa theo số
+        s.sendMessage("§f/music favorite §7lưu | §f/music favorite remove §7bỏ lưu | §f/music favorite remove-index <số> §7xóa theo số");
         s.sendMessage("§f/music favorites §7yêu thích | §f/music history §7lịch sử | §f/music clearhistory §7xóa lịch sử");
         s.sendMessage("§f/music playfavorite <số> §7phát thư viện | §f/music playhistory <số> §7phát lịch sử | §f/music search <từ khóa> §7tìm YouTube");
         s.sendMessage("§f/music lyrics [on|off] §7lời riêng | §f/music say <người chơi> §7bật/tắt lời cho người chơi");
