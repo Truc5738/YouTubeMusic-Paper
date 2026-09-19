@@ -68,7 +68,7 @@ public final class MusicCommand implements CommandExecutor, TabCompleter {
             case "shuffle" -> { if (!control(s)) return true; music.toggleShuffle(); s.sendMessage("§d🔀 Trộn: " + (music.shuffle() ? "BẬT" : "TẮT")); }
             case "radio" -> { if (!control(s)) return true; music.toggleRadio(); s.sendMessage("§5📻 Radio: " + (music.radio() ? "BẬT" : "TẮT")); }
             case "favorite", "fav" -> favorite(s, a);
-            case "search" -> search(s, a);
+            case "search", "find" -> search(s, a);
             case "playfavorite", "pfav" -> playSavedByIndex(s, a, false);
             case "playhistory", "phistory" -> playSavedByIndex(s, a, true);
             case "clearhistory", "delhistory" -> clearHistory(s);
@@ -77,7 +77,7 @@ public final class MusicCommand implements CommandExecutor, TabCompleter {
             case "say" -> sayLyrics(s, a);
             case "favorites", "favs" -> listSaved(s, false);
             case "history" -> listSaved(s, true);
-            case "status", "now" -> {
+            case "status", "now", "nowplaying", "np" -> {
                 Track t = music.current();
                 s.sendMessage("§b🎵 Đang phát: §f" + (t == null ? "Không có" : t.title()));
                 s.sendMessage("§7Queue: " + music.queue().size() + " | Lặp: " + music.loop() + " | Trộn: " + music.shuffle() + " | Radio: " + music.radio());
