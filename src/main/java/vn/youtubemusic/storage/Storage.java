@@ -111,6 +111,24 @@ public final class Storage {
         return out;
     }
 
+    public synchronized boolean removeFavoriteByIndex(UUID uuid, int index) {
+        List<Track> list = favorites(uuid, 100);
+        if (index < 1 || index > list.size()) return false;
+        return unfavorite(uuid, list.get(index - 1).url());
+    }
+
+    public synchronized boolean clearHistory(UUID uuid) {
+        if (connection == null) return false;
+        try (PreparedStatement p = connection.prepareStatement("DELETE FROM history WHERE uuid=?")) {
+            p.setString(1, uuid.toString());
+            p.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            plugin.getLogger().warning("Không xóa được lịch sử: " + e.getMessage());
+            return false;
+        }
+    }
+
     public synchronized void close() {
         try { if (connection != null) connection.close(); } catch (SQLException ignored) {}
         connection = null;
