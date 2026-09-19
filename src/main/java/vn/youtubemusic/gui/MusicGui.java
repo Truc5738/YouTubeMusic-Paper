@@ -45,6 +45,9 @@ public final class MusicGui implements Listener {
         i.setItem(23,item(Material.NOTE_BLOCK,"§f🔊 Âm lượng: "+music.volume(p)+"%"));
         i.setItem(24,item(Material.GOLD_INGOT,"§6♥ "+(t!=null&&storage.isFavorite(p.getUniqueId(),t.url())?"Bỏ lưu":"Lưu bài hiện tại")));
         i.setItem(25,item(Material.BOOK,"§fℹ Trạng thái","§7UI Java + Bedrock","§7API audio + resource pack"));
+        i.setItem(26,item(Material.PAPER,"§a🔎 Tìm kiếm bằng lệnh","§7/music search <từ khóa>"));
+        i.setItem(27,item(Material.LAVA_BUCKET,"§c🧹 Xóa lịch sử","§7Chỉ xóa lịch sử của bạn"));
+        i.setItem(28,item(Material.ENDER_EYE,"§b🎧 Thông tin bài đang phát","§7Xem URL và thời lượng"));
         i.setItem(32,item(Material.WRITABLE_BOOK,"§d🎤 Lời bài hát riêng","§7"+(music.lyrics().isEnabled(p)?"Đang BẬT":"Đang TẮT"),"§7Chỉ bạn thấy lyrics","§7Dùng /music lyrics để đổi"));
         i.setItem(31,item(Material.WRITABLE_BOOK,"§f⚙ Hướng dẫn","§7/musics để mở UI (lệnh /music vẫn dùng được)"));
         i.setItem(40,item(Material.BARRIER,"§cĐóng"));
@@ -85,8 +88,12 @@ public final class MusicGui implements Listener {
                 case 13->{if(music.paused())music.resume();else music.pause();open(p);}case 14->{music.skip();open(p);}case 15->{music.stop();open(p);}
                 case 16->{music.toggleLoop();open(p);}case 19->library(p,false);case 20->library(p,true);
                 case 21->{music.toggleRadio();open(p);}case 22->{music.toggleShuffle();open(p);}
-                case 23->p.sendMessage("§bDùng /music volume <0-100> để chỉnh âm lượng.");
+                case 23->p.sendMessage("§b🔊 Âm lượng hiện tại: §f"+music.volume(p)+"%§7. Dùng /music volume <0-100> để chỉnh.");
                 case 24->{if(music.current()!=null)p.sendMessage(music.toggleFavorite(p)?"§a♥ Đã lưu bài.":"§e♥ Đã bỏ lưu bài.");open(p);}
+                case 26->p.sendMessage("§b🔎 Dùng /music search <từ khóa> §7để tìm YouTube.");
+                case 27->{storage.clearHistory(p.getUniqueId());p.sendMessage("§a🧹 Đã xóa lịch sử nghe của bạn.");open(p);}
+                case 28->{Track now=music.current();p.sendMessage(now==null?"§eChưa có bài đang phát.":"§b🎵 "+now.title()+" §7| URL: §f"+now.url()+" §7| Thời lượng: §f"+now.durationSeconds()+"s");}
+
                 case 31->p.sendMessage("§bTìm kiếm cần YouTube Data API key trong config.yml. §7URL vẫn hoạt động không cần key.");
                 case 32->{music.lyrics().toggle(p);open(p);}
                 case 40->p.closeInventory();
