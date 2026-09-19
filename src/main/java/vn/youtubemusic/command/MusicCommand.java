@@ -68,6 +68,11 @@ public final class MusicCommand implements CommandExecutor, TabCompleter {
             case "shuffle" -> { if (!control(s)) return true; music.toggleShuffle(); s.sendMessage("§d🔀 Trộn: " + (music.shuffle() ? "BẬT" : "TẮT")); }
             case "radio" -> { if (!control(s)) return true; music.toggleRadio(); s.sendMessage("§5📻 Radio: " + (music.radio() ? "BẬT" : "TẮT")); }
             case "favorite", "fav" -> favorite(s, a);
+            case "search" -> search(s, a);
+            case "playfavorite", "pfav" -> playSavedByIndex(s, a, false);
+            case "playhistory", "phistory" -> playSavedByIndex(s, a, true);
+            case "clearhistory", "delhistory" -> clearHistory(s);
+
             case "lyrics", "lyric" -> lyrics(s, a);
             case "say" -> sayLyrics(s, a);
             case "favorites", "favs" -> listSaved(s, false);
@@ -122,10 +127,47 @@ public final class MusicCommand implements CommandExecutor, TabCompleter {
             else s.sendMessage("§a♥ Đã bỏ khỏi yêu thích.");
             return;
         }
+        if (a.length >= 2 && a[1].equalsIgnoreCase("remove-index")) {
+            if (a.length < 3) { s.sendMessage("§eDùng: /music favorite remove-index <số>"); return; }
+            try {
+                s.sendMessage(storage.removeFavoriteByIndex(p.getUniqueId(), Integer.parseInt(a[2]))
+                    ? "§a♥ Đã xóa bài khỏi yêu thích." : "§cKhông tìm thấy mục yêu thích đó.");
+            } catch (NumberFormatException ex) { s.sendMessage("§cSố không hợp lệ."); }
+            return;
+        }
         if (t == null) { s.sendMessage("§eChưa có bài đang phát để lưu."); return; }
         if (storage.isFavorite(p.getUniqueId(), t.url())) { s.sendMessage("§eBài này đã có trong yêu thích."); return; }
         storage.favorite(p.getUniqueId(), t);
         s.sendMessage("§a♥ Đã lưu bài hiện tại vào yêu thích.");
+    }
+
+    private void search(CommandSender s, String[] a) {
+        if (!(s instanceof Player p)) { s.sendMessage("§cLệnh này cần một người chơi."); return; }
+        if (a.length < 2) { s.sendMessage("§eDùng: /music search <từ khóa>"); return; }
+        String q = String.join(" ", Arrays.copyOfRange(a, 1, a.length));
+        s.sendMessage("§e🔎 Đang tìm YouTube: §f" + q);
+        music.search(p, q, results -> {
+            if (results.isEmpty()) { s.sendMessage("§eKhông có kết quả. Hãy kiểm tra YouTube Data API key trong config.yml."); return; }
+            s.sendMessage("§b§lKết quả tìm kiếm:");
+            for (int i=0; i<results.size(); i++) s.sendMessage("§7"+(i+1)+". §f"+results.get(i).title());
+            s.sendMessage("§7Dùng §f/music playfavorite <số> §7cho thư viện; kết quả tìm kiếm có thể phát trực tiếp từ UI.");
+        });
+    }
+
+    private void playSavedByIndex(CommandSender s, String[] a, boolean history) {
+        if (!(s instanceof Player p)) { s.sendMessage("§cLệnh này cần một người chơi."); return; }
+        if (a.length < 2) { s.sendMessage("§eDùng: /music "+(history?"playhistory":"playfavorite")+" <số>"); return; }
+        try {
+            int index=Integer.parseInt(a[1]);
+            List<Track> list=history?storage.history(p.getUniqueId(),100):storage.favorites(p.getUniqueId(),100);
+            if(index<1||index>list.size()){s.sendMessage("§cKhông có mục số "+index+".");return;}
+            music.playSaved(p,list.get(index-1));
+        } catch(NumberFormatException ex){s.sendMessage("§cSố không hợp lệ.");}
+    }
+
+    private void clearHistory(CommandSender s) {
+        if (!(s instanceof Player p)) { s.sendMessage("§cLệnh này cần một người chơi."); return; }
+        s.sendMessage(storage.clearHistory(p.getUniqueId()) ? "§a🧹 Đã xóa lịch sử nghe của bạn." : "§cKhông thể xóa lịch sử.");
     }
 
     private void listSaved(CommandSender s, boolean history) {
@@ -174,13 +216,15 @@ public final class MusicCommand implements CommandExecutor, TabCompleter {
         s.sendMessage("§b§lYouTube Music §7— lệnh chính");
         s.sendMessage("§f/music §7UI | §f/music play <URL> §7phát | §f/music queue §7hàng đợi | §f/music skip §7bỏ qua | §f/music stop §7dừng");
         s.sendMessage("§f/music volume <0-100> §7âm lượng | §f/music loop §7lặp | §f/music shuffle §7trộn | §f/music radio §7radio");
-        s.sendMessage("§f/music favorite §7lưu bài hiện tại | §f/music favorite remove §7bỏ lưu | §f/music favorites §7yêu thích | §f/music history §7lịch sử");
-        s.sendMessage("§f/music lyrics §7bật/tắt lời riêng | §f/music say <người chơi> §7bật lời cho người chơi");
+        s.sendMessage("§f/music favorite §7lưu | §f/music favorite remove §7bỏ lưu | §f/music favorite remove-index <số> §7xóa theo số
+        s.sendMessage("§f/music favorites §7yêu thích | §f/music history §7lịch sử | §f/music clearhistory §7xóa lịch sử");
+        s.sendMessage("§f/music playfavorite <số> §7phát thư viện | §f/music playhistory <số> §7phát lịch sử | §f/music search <từ khóa> §7tìm YouTube");
+        s.sendMessage("§f/music lyrics [on|off] §7lời riêng | §f/music say <người chơi> §7bật/tắt lời cho người chơi");
     }
 
     public List<String> onTabComplete(CommandSender s, Command c, String alias, String[] args) {
-        if (args.length == 1) return List.of("play", "ui", "stop", "pause", "resume", "skip", "queue", "clear", "remove", "volume", "loop", "shuffle", "radio", "favorite", "favorites", "history", "lyrics", "say", "status", "reload", "debug", "doctor", "diagnostics", "help").stream().filter(x -> x.startsWith(args[0].toLowerCase(Locale.ROOT))).toList();
-        if (args.length == 2 && (args[0].equalsIgnoreCase("favorite") || args[0].equalsIgnoreCase("fav"))) return List.of("remove").stream().filter(x -> x.startsWith(args[1].toLowerCase(Locale.ROOT))).toList();
+        if (args.length == 1) return List.of("play", "ui", "stop", "pause", "resume", "skip", "queue", "clear", "remove", "volume", "loop", "shuffle", "radio", "favorite", "favorites", "history", "clearhistory", "playfavorite", "playhistory", "search", "lyrics", "say", "status", "reload", "debug", "doctor", "diagnostics", "help").stream().filter(x -> x.startsWith(args[0].toLowerCase(Locale.ROOT))).toList();
+        if (args.length == 2 && (args[0].equalsIgnoreCase("favorite") || args[0].equalsIgnoreCase("fav"))) return List.of("remove","remove-index").stream().filter(x -> x.startsWith(args[1].toLowerCase(Locale.ROOT))).toList();
         return List.of();
     }
 }
