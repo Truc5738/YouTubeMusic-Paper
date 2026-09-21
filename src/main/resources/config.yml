@@ -5,39 +5,43 @@ lyrics:
   format: "lrc"
   private-chat: true
 
-# Paper 26.2+ yêu cầu Java 25.
 ui:
   enabled: true
   bedrock-forms: true
   java-inventory: true
+
 queue:
   max-size: 25
   loop: false
   shuffle: false
   radio: false
+
 request:
   cooldown-seconds: 5
+
 security:
   max-url-length: 2048
   max-track-duration-seconds: 3600
   allow-youtube-only: true
+
 player:
   default-volume: 80
   max-volume: 100
+
 storage:
   file: music.db
+
 audio:
   backend: api-resource-pack
   max-duration-seconds: 3600
   default-duration-seconds: 600
   api:
-    # Cobalt-compatible API instance. Tự host API để ổn định và tránh phụ thuộc API công cộng.
-    url: "http://127.0.0.1:9000/"
+    # Audio API chạy trên TCP 26467. UDP 26467 vẫn dành cho Geyser/Voice Chat.
+    # Đổi host nếu địa chỉ máy chủ của bạn khác.
+    url: "http://nvnmc.asia:26467/"
     key: ""
     bitrate: "128"
     timeout-seconds: 120
-  # Optional: YouTube Data API v3 key for title + thời lượng chính xác.
-  # Không dùng để lấy audio; audio vẫn do API resolver ở trên cung cấp.
   youtube-data-api-key: ""
   download-timeout-seconds: 300
   resource-pack-url-template: "http://YOUR_PUBLIC_IP:8126/packs/%s"
