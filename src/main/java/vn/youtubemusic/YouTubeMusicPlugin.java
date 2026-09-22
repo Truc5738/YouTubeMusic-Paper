@@ -1,6 +1,7 @@
 package vn.youtubemusic;
 
 import org.bukkit.plugin.java.JavaPlugin;
+import vn.youtubemusic.audio.LocalAudioApiServer;
 import vn.youtubemusic.command.MusicCommand;
 import vn.youtubemusic.geyser.BedrockUiBridge;
 import vn.youtubemusic.gui.MusicGui;
@@ -10,6 +11,7 @@ import vn.youtubemusic.storage.Storage;
 public final class YouTubeMusicPlugin extends JavaPlugin {
     private Storage storage;
     private MusicManager music;
+    private LocalAudioApiServer localAudioApi;
 
     @Override public void onEnable() {
         saveDefaultConfig();
@@ -21,6 +23,8 @@ public final class YouTubeMusicPlugin extends JavaPlugin {
             return;
         }
         validateAudioConfiguration();
+        localAudioApi = new LocalAudioApiServer(this);
+        localAudioApi.start();
         storage = new Storage(this);
         music = new MusicManager(this, storage);
         MusicGui gui = new MusicGui(this, music, storage);
@@ -39,6 +43,10 @@ public final class YouTubeMusicPlugin extends JavaPlugin {
     private void validateAudioConfiguration() {
         String apiUrl = getConfig().getString("audio.api.url", "");
         if (apiUrl.isBlank()) getLogger().warning("audio.api.url chưa cấu hình; plugin sẽ không thể lấy audio.");
+        String resolverUrl = getConfig().getString("audio.resolver.url", "");
+        if (resolverUrl.isBlank()) getLogger().warning("audio.resolver.url chưa cấu hình; Local Audio API sẽ trả resolver_not_configured.");
+        int localPort = getConfig().getInt("audio.local-api.port", 26467);
+        if (localPort < 1 || localPort > 65535) getLogger().warning("audio.local-api.port không hợp lệ: " + localPort);
         String packUrl = getConfig().getString("audio.resource-pack-url-template", "");
         if (packUrl.isBlank() || packUrl.contains("YOUR_PUBLIC_IP")) {
             getLogger().warning("Resource-pack URL chưa cấu hình; YouTubeMusic sẽ không thể phát audio Java cho đến khi cấu hình audio.resource-pack-url-template.");
@@ -53,6 +61,7 @@ public final class YouTubeMusicPlugin extends JavaPlugin {
     }
 
     @Override public void onDisable() {
+        if (localAudioApi != null) localAudioApi.stop();
         if (music != null) music.shutdown();
         if (storage != null) storage.close();
     }
