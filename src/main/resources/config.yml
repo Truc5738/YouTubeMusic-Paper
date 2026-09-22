@@ -35,13 +35,28 @@ audio:
   backend: api-resource-pack
   max-duration-seconds: 3600
   default-duration-seconds: 600
+
+  # Plugin tự mở HTTP Audio API bằng JDK trên TCP 26467.
+  # UDP 26467 vẫn có thể do Geyser/Simple Voice Chat sử dụng.
+  local-api:
+    enabled: true
+    bind: "0.0.0.0"
+    port: 26467
+
+  # ApiAudioBackend gọi API nội bộ này; không cần truy cập DNS public.
   api:
-    # Audio API chạy trên TCP 26467. UDP 26467 vẫn dành cho Geyser/Voice Chat.
-    # Đổi host nếu địa chỉ máy chủ của bạn khác.
-    url: "http://nvnmc.asia:26467/"
+    url: "http://127.0.0.1:26467/"
     key: ""
     bitrate: "128"
     timeout-seconds: 120
+
+  # Đây là resolver externo que LocalAudioApiServer proxy. Phải là một
+  # Cobalt-compatible API được phép sử dụng; plugin không cài FFmpeg/yt-dlp.
+  resolver:
+    url: ""
+    key: ""
+    timeout-seconds: 120
+
   youtube-data-api-key: ""
   download-timeout-seconds: 300
   resource-pack-url-template: "http://YOUR_PUBLIC_IP:8126/packs/%s"
