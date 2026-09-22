@@ -40,9 +40,9 @@
     <resources><resource><directory>src/main/resources</directory><filtering>false</filtering></resource></resources>
     <plugins>
       <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-enforcer-plugin</artifactId><version>3.6.2</version><executions><execution><id>enforce-java-25</id><phase>validate</phase><goals><goal>enforce</goal></goals><configuration><rules><requireJavaVersion><version>[25,26)</version></requireJavaVersion></rules></configuration></execution></executions></plugin>
-      <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><version>3.14.0</version><configuration><release>25</release><encoding>UTF-8</encoding><parameters>true</parameters></configuration></plugin>
+      <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><version>3.14.0</version><configuration><release>25</release><encoding>UTF-8</encoding><parameters>true</parameters><compilerArgs><arg>--add-modules</arg><arg>jdk.httpserver</arg></compilerArgs></configuration></plugin>
       <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-jar-plugin</artifactId><version>3.4.2</version></plugin>
-      <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-shade-plugin</artifactId><version>3.6.0</version><executions><execution><phase>package</phase><goals><goal>shade</goal></goals><configuration><createDependencyReducedPom>false</createDependencyReducedPom><shadedArtifactAttached>false</shadedArtifactAttached><minimizeJar>false</minimizeJar><artifactSet><includes><include>org.xerial:sqlite-jdbc</include></includes></artifactSet></configuration></execution></executions></plugin>
+      <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-shade-plugin</artifactId><version>3.6.0</version><executions><execution><phase>package</phase><goals><goal>shade</goal></goals><configuration><createDependencyReducedPom>false</createDependencyReducedPom><shadedArtifactAttached>false</shadedArtifactAttached><minimizeJar>false</minimizeJar><artifactSet><includes><include>org.xerial:sqlite-jdbc</include></artifactSet></configuration></execution></plugin>
     </plugins>
   </build>
 </project>
