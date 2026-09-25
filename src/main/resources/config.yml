@@ -60,7 +60,7 @@ audio:
 
   # Public TCP URL that Minecraft Java clients can reach.
   # Replace YOUR_PUBLIC_IP with your host/domain.
-  resource-pack-url-template: "http://YOUR_PUBLIC_IP:26467/packs/%s"
+  resource-pack-url-template: "http://nvnmc.asia:26467/packs/%s"
   resource-pack-required: false
   resource-pack-timeout-seconds: 90
   resource-pack-https-recommended: true
