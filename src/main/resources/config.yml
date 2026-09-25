@@ -58,6 +58,14 @@ audio:
     timeout-seconds: 120
 
   youtube-data-api-key: ""
+  resolver:
+    url: ""
+    key: ""
+    timeout-seconds: 120
+  local-api:
+    enabled: true
+    bind: "0.0.0.0"
+    port: 26467
   download-timeout-seconds: 300
   resource-pack-url-template: "http://YOUR_PUBLIC_IP:8126/packs/%s"
   resource-pack-required: false
