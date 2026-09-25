@@ -13,17 +13,20 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.concurrent.Executors;
 
 /**
- * Embedded HTTP bridge. Uses only JDK APIs; no FFmpeg, JAVE2, yt-dlp or extra package.
- * TCP port can share the same number as Geyser/voice-chat UDP because TCP and UDP
- * are separate transports.
+ * Embedded JDK-only HTTP server.
+ * Serves the local resolver bridge and generated resource packs on the same TCP port.
+ * TCP and UDP may use the same numeric port because they are separate transports.
  */
 public final class LocalAudioApiServer {
     private final JavaPlugin plugin;
     private final HttpClient client;
+    private final Path packRoot;
     private HttpServer server;
     private String resolverUrl;
     private String apiKey;
@@ -34,31 +37,31 @@ public final class LocalAudioApiServer {
                 .connectTimeout(Duration.ofSeconds(20))
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .build();
+        this.packRoot = plugin.getDataFolder().toPath().resolve("resource-packs");
     }
 
     public void start() {
         if (!plugin.getConfig().getBoolean("audio.local-api.enabled", true)) return;
+
         int port = plugin.getConfig().getInt("audio.local-api.port", 26467);
         String bind = plugin.getConfig().getString("audio.local-api.bind", "0.0.0.0");
         resolverUrl = normalize(plugin.getConfig().getString("audio.resolver.url", ""));
         apiKey = plugin.getConfig().getString("audio.resolver.key", "").trim();
 
-        if (resolverUrl.isBlank()) {
-            plugin.getLogger().warning("Audio API local đã bật nhưng audio.resolver.url chưa được cấu hình.");
-        }
         try {
+            Files.createDirectories(packRoot);
             server = HttpServer.create(new InetSocketAddress(bind, port), 0);
             server.createContext("/health", this::health);
             server.createContext("/api/audio", this::audio);
-            server.setExecutor(Executors.newFixedThreadPool(2, r -> {
-                Thread t = new Thread(r, "YouTubeMusic-local-api");
-                t.setDaemon(true);
-                return t;
-            }));
+            server.createContext("/packs", this::packs);
+            server.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
             server.start();
-            plugin.getLogger().info("Local Audio API listening on TCP " + bind + ":" + port);
+            plugin.getLogger().info("Local Audio API + Resource Pack HTTP listening on TCP " + bind + ":" + port);
+            if (resolverUrl.isBlank()) {
+                plugin.getLogger().warning("audio.resolver.url chưa cấu hình; /api/audio sẽ trả resolver_not_configured.");
+            }
         } catch (IOException e) {
-            plugin.getLogger().severe("Không thể mở Local Audio API TCP " + bind + ":" + port + ": " + e.getMessage());
+            plugin.getLogger().severe("Không thể mở HTTP server TCP " + bind + ":" + port + ": " + e.getMessage());
         }
     }
 
@@ -67,7 +70,8 @@ public final class LocalAudioApiServer {
             send(exchange, 405, "Method Not Allowed", "text/plain; charset=utf-8");
             return;
         }
-        String body = "{\"ok\":true,\"service\":\"YouTubeMusic Audio API\",\"resolverConfigured\":" + (!resolverUrl.isBlank()) + "}";
+        String body = "{"ok":true,"service":"YouTubeMusic HTTP","resolverConfigured":"
+                + (!resolverUrl.isBlank()) + ","resourcePacks":true}";
         send(exchange, 200, body, "application/json; charset=utf-8");
     }
 
@@ -77,7 +81,8 @@ public final class LocalAudioApiServer {
             return;
         }
         if (resolverUrl.isBlank()) {
-            send(exchange, 503, "{\"status\":\"error\",\"code\":\"resolver_not_configured\"}", "application/json; charset=utf-8");
+            send(exchange, 503, "{"status":"error","code":"resolver_not_configured"}",
+                    "application/json; charset=utf-8");
             return;
         }
 
@@ -86,7 +91,8 @@ public final class LocalAudioApiServer {
             requestBody = in.readAllBytes();
         }
         if (requestBody.length == 0 || requestBody.length > 32_768) {
-            send(exchange, 400, "{\"status\":\"error\",\"code\":\"invalid_request\"}", "application/json; charset=utf-8");
+            send(exchange, 400, "{"status":"error","code":"invalid_request"}",
+                    "application/json; charset=utf-8");
             return;
         }
 
@@ -98,12 +104,49 @@ public final class LocalAudioApiServer {
                     .POST(HttpRequest.BodyPublishers.ofByteArray(requestBody));
             if (!apiKey.isBlank()) request.header("Authorization", "Api-Key " + apiKey);
 
-            HttpResponse<String> response = client.send(request.build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            String contentType = response.headers().firstValue("content-type").orElse("application/json; charset=utf-8");
+            HttpResponse<String> response = client.send(
+                    request.build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            String contentType = response.headers().firstValue("content-type")
+                    .orElse("application/json; charset=utf-8");
             send(exchange, response.statusCode(), response.body(), contentType);
         } catch (Exception e) {
             plugin.getLogger().warning("Audio resolver request failed: " + e.getMessage());
-            send(exchange, 502, "{\"status\":\"error\",\"code\":\"resolver_unreachable\"}", "application/json; charset=utf-8");
+            send(exchange, 502, "{"status":"error","code":"resolver_unreachable"}",
+                    "application/json; charset=utf-8");
+        }
+    }
+
+    private void packs(HttpExchange exchange) throws IOException {
+        if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+            send(exchange, 405, "Method Not Allowed", "text/plain; charset=utf-8");
+            return;
+        }
+
+        String path = exchange.getRequestURI().getPath();
+        String prefix = "/packs/";
+        if (!path.startsWith(prefix)) {
+            send(exchange, 404, "Not Found", "text/plain; charset=utf-8");
+            return;
+        }
+
+        String name = path.substring(prefix.length());
+        if (name.isBlank() || name.contains("..") || name.contains("/") || name.contains("\")
+                || !name.endsWith(".zip")) {
+            send(exchange, 404, "Not Found", "text/plain; charset=utf-8");
+            return;
+        }
+
+        Path file = packRoot.resolve(name).normalize();
+        if (!file.startsWith(packRoot.normalize()) || !Files.isRegularFile(file)) {
+            send(exchange, 404, "Not Found", "text/plain; charset=utf-8");
+            return;
+        }
+
+        exchange.getResponseHeaders().set("Content-Type", "application/zip");
+        exchange.getResponseHeaders().set("Cache-Control", "public, max-age=31536000, immutable");
+        exchange.sendResponseHeaders(200, Files.size(file));
+        try (OutputStream out = exchange.getResponseBody()) {
+            Files.copy(file, out);
         }
     }
 
