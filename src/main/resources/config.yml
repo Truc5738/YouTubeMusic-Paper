@@ -36,43 +36,40 @@ audio:
   max-duration-seconds: 3600
   default-duration-seconds: 600
 
-  # Plugin tự mở HTTP Audio API bằng JDK trên TCP 26467.
-  # UDP 26467 vẫn có thể do Geyser/Simple Voice Chat sử dụng.
+  # Shared JDK HTTP server. TCP 26467 may use the same number as UDP 26467.
   local-api:
     enabled: true
     bind: "0.0.0.0"
     port: 26467
 
-  # ApiAudioBackend gọi API nội bộ này; không cần truy cập DNS public.
+  # Internal bridge used by ApiAudioBackend.
   api:
-    url: "http://127.0.0.1:26467/"
+    url: "http://127.0.0.1:26467/api/audio"
     key: ""
     bitrate: "128"
     timeout-seconds: 120
 
-  # Đây là resolver externo que LocalAudioApiServer proxy. Phải là một
-  # Cobalt-compatible API được phép sử dụng; plugin không cài FFmpeg/yt-dlp.
+  # Cobalt-compatible resolver. Required for actual YouTube audio resolution.
   resolver:
     url: ""
     key: ""
     timeout-seconds: 120
 
   youtube-data-api-key: ""
-  resolver:
-    url: ""
-    key: ""
-    timeout-seconds: 120
-  local-api:
-    enabled: true
-    bind: "0.0.0.0"
-    port: 26467
   download-timeout-seconds: 300
-  resource-pack-url-template: "http://YOUR_PUBLIC_IP:8126/packs/%s"
+
+  # Public TCP URL that Minecraft Java clients can reach.
+  # Replace YOUR_PUBLIC_IP with your host/domain.
+  resource-pack-url-template: "http://YOUR_PUBLIC_IP:26467/packs/%s"
   resource-pack-required: false
   resource-pack-timeout-seconds: 90
   resource-pack-https-recommended: true
   play-delay-ticks: 60
+
+  # Deprecated separate pack-server settings are kept only for compatibility.
+  # Resource packs are now served by local-api on TCP 26467.
   resource-pack-server:
-    enabled: true
+    enabled: false
   resource-pack-server-port: 8126
+
   cache-directory: "audio-cache"
