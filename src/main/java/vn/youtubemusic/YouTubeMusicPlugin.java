@@ -51,11 +51,9 @@ public final class YouTubeMusicPlugin extends JavaPlugin {
         if (packUrl.isBlank() || packUrl.contains("YOUR_PUBLIC_IP")) {
             getLogger().warning("Resource-pack URL chưa cấu hình; YouTubeMusic sẽ không thể phát audio Java cho đến khi cấu hình audio.resource-pack-url-template.");
         }
-        if (!getConfig().getBoolean("audio.resource-pack-server.enabled", true)) {
-            getLogger().warning("Embedded resource-pack server đang tắt; URL phải trỏ tới máy chủ cung cấp ZIP bên ngoài.");
+        if (!getConfig().getBoolean("audio.local-api.enabled", true)) {
+            getLogger().warning("Local Audio API đang tắt; /api/audio và /packs sẽ không hoạt động.");
         }
-        int port = getConfig().getInt("audio.resource-pack-server-port", 8126);
-        if (port < 1 || port > 65535) getLogger().warning("audio.resource-pack-server-port không hợp lệ: " + port);
         int maxVolume = getConfig().getInt("player.max-volume", 100);
         if (maxVolume < 1 || maxVolume > 100) getLogger().warning("player.max-volume phải nằm trong 1-100.");
     }
